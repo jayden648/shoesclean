@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "esnext", // Atau "es2020", "es2021", dll. sesuai kebutuhan
+    "module": "esnext",
+    "moduleResolution": "node",
+    "lib": ["esnext"],
+    "jsx": "react-jsx", // Diperlukan jika menggunakan JSX dengan Hono (misalnya untuk htmx)
+    "jsxImportSource": "hono/jsx",
+    "esModuleInterop": true,
+    "strict": true, // Direkomendasikan untuk penangkapan error yang lebih baik
+    "skipLibCheck": true, // Dapat mempercepat kompilasi
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true, // Cloudflare Workers menangani bundling dan emisi, TypeScript hanya untuk type checking
+    "types": [
+      "@cloudflare/workers-types" // Penting untuk tipe global Cloudflare Workers
+    ]
+  },
+  "include": ["src/**/*.ts"], // Sesuaikan jika struktur direktori Anda berbeda
+  "exclude": ["node_modules"]
+}

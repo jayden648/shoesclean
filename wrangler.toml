@@ -2,3 +2,8 @@ name = "shoesclean"
 main = "src/index.ts"
 compatibility_date = "2024-01-20" 
 account_id = "c8e7cc23b5cff77fbf9eef544cb35f69" 
+
+[[d1_databases]]
+binding = "Shoesclean" # Ini adalah bagaimana Anda akan mengaksesnya dalam kode Anda (misalnya, c.env.Shoesclean)
+database_name = "your-db-name-from-dashboard" # Nama database D1 Anda di dashboard Cloudflare
+database_id = "your-actual-id-from-dashboard" # ID Database yang Anda salin

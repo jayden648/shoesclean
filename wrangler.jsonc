@@ -1,6 +1,13 @@
 {
   "name": "shoesclean",
   "compatibility_date": "2025-06-12",
-  "main": "src/index.ts"
+  "main": "src/index.ts",
+  "account_id": "c8e7cc23b5cff77fbf9eef544cb35f69",
+  "d1_databases": [
+    {
+      "binding": "Shoesclean", // Ini adalah nama yang Anda gunakan di kode (c.env.Shoesclean)
+      "database_name": "nama-database-anda-di-cloudflare", // Ganti dengan nama database D1 Anda di dashboard Cloudflare
+      "database_id": "c8e7cc23b5cff77fbf9eef544cb35f69" // Ganti dengan ID database D1 Anda
+    }
+  ]
 }
-  
