@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
-// .wrangler/tmp/bundle-uR00Ls/strip-cf-connecting-ip-header.js
+// .wrangler/tmp/bundle-2KAzO4/strip-cf-connecting-ip-header.js
 function stripCfConnectingIPHeader(input, init) {
   const request = new Request(input, init);
   request.headers.delete("CF-Connecting-IP");
@@ -1635,7 +1635,7 @@ var cors = /* @__PURE__ */ __name((options) => {
 
 // src/index.ts
 var app = new Hono2();
-app.use("/*", cors({
+app.use("/api/*", cors({
   origin: "*",
   allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowHeaders: ["Content-Type", "Authorization"]
@@ -1668,6 +1668,396 @@ var safeNumber = /* @__PURE__ */ __name((value) => {
   if (typeof value === "string") return parseInt(value) || 0;
   return 0;
 }, "safeNumber");
+var getHTMLPage = /* @__PURE__ */ __name(() => `
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShoesClean - Layanan Cuci Sepatu</title>
+    <script src="https://cdn.tailwindcss.com"><\/script>
+    <style>
+        .loading { opacity: 0.5; pointer-events: none; }
+        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-blue-600 mb-2">\u{1F9B6} ShoesClean</h1>
+            <p class="text-gray-600">Layanan Profesional Cuci Sepatu</p>
+        </div>
+
+        <!-- Add Service Form -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Tambah Layanan Baru</h2>
+            <form id="serviceForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Layanan</label>
+                    <input type="text" id="serviceName" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="Contoh: Basic Cleaning">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Harga (Rp)</label>
+                    <input type="number" id="servicePrice" required min="0" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="25000">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Durasi (menit)</label>
+                    <input type="number" id="serviceDuration" min="0" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="30">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
+                    <input type="text" id="serviceDescription" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="Pembersihan sepatu standar">
+                </div>
+                <div class="md:col-span-2">
+                    <button type="submit" 
+                            class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        Tambah Layanan
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Services List -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-semibold">Daftar Layanan</h2>
+                <div class="flex gap-2">
+                    <input type="text" id="searchInput" placeholder="Cari layanan..." 
+                           class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button onclick="loadServices()" 
+                            class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+                        Refresh
+                    </button>
+                </div>
+            </div>
+            
+            <div id="servicesContainer" class="space-y-4">
+                <div class="text-center py-8">
+                    <div class="animate-pulse text-gray-500">Memuat layanan...</div>
+                </div>
+            </div>
+            
+            <!-- Pagination -->
+            <div id="pagination" class="mt-6 flex justify-center gap-2"></div>
+        </div>
+
+        <!-- Stats -->
+        <div id="statsContainer" class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 class="text-xl font-semibold mb-4">Edit Layanan</h3>
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Layanan</label>
+                    <input type="text" id="editName" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Harga (Rp)</label>
+                    <input type="number" id="editPrice" required min="0" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Durasi (menit)</label>
+                    <input type="number" id="editDuration" min="0" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
+                    <input type="text" id="editDescription" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                        Update
+                    </button>
+                    <button type="button" onclick="closeEditModal()" 
+                            class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        
+        // API Base URL (sama dengan worker ini)
+        const API_BASE = '';
+
+        // Load services
+        async function loadServices(page = 1, search = '') {
+            try {
+                const container = document.getElementById('servicesContainer');
+                container.innerHTML = '<div class="text-center py-8"><div class="animate-pulse text-gray-500">Memuat layanan...</div></div>';
+
+                const params = new URLSearchParams({
+                    page: page.toString(),
+                    limit: itemsPerPage.toString()
+                });
+                
+                if (search.trim()) {
+                    params.append('search', search.trim());
+                }
+
+                const response = await fetch(\`/api/services?\${params.toString()}\`);
+                const data = await response.json();
+
+                if (data.success) {
+                    displayServices(data.services);
+                    displayPagination(data.pagination);
+                    currentPage = page;
+                } else {
+                    container.innerHTML = \`<div class="text-center py-8 text-red-500">Error: \${data.error}</div>\`;
+                }
+            } catch (error) {
+                console.error('Error loading services:', error);
+                document.getElementById('servicesContainer').innerHTML = 
+                    '<div class="text-center py-8 text-red-500">Gagal memuat layanan</div>';
+            }
+        }
+
+        // Display services
+        function displayServices(services) {
+            const container = document.getElementById('servicesContainer');
+            
+            if (services.length === 0) {
+                container.innerHTML = '<div class="text-center py-8 text-gray-500">Belum ada layanan tersedia</div>';
+                return;
+            }
+
+            container.innerHTML = services.map(service => \`
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <h3 class="text-lg font-semibold text-gray-800">\${service.name}</h3>
+                            <p class="text-gray-600 mt-1">\${service.description || 'Tidak ada deskripsi'}</p>
+                            <div class="mt-2 flex flex-wrap gap-4 text-sm text-gray-500">
+                                <span class="font-medium text-green-600">Rp \${service.price.toLocaleString('id-ID')}</span>
+                                \${service.duration_minutes ? \`<span>\u23F1\uFE0F \${service.duration_minutes} menit</span>\` : ''}
+                                <span>\u{1F4C5} \${new Date(service.created_at).toLocaleDateString('id-ID')}</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 ml-4">
+                            <button onclick="editService(\${service.id})" 
+                                    class="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600">
+                                Edit
+                            </button>
+                            <button onclick="deleteService(\${service.id})" 
+                                    class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600">
+                                Hapus
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            \`).join('');
+        }
+
+        // Display pagination
+        function displayPagination(pagination) {
+            const container = document.getElementById('pagination');
+            const { currentPage, totalPages, hasNextPage, hasPrevPage } = pagination;
+
+            let html = '';
+            
+            if (hasPrevPage) {
+                html += \`<button onclick="loadServices(\${currentPage - 1}, document.getElementById('searchInput').value)" 
+                                class="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">\xAB Prev</button>\`;
+            }
+            
+            html += \`<span class="px-3 py-2 bg-gray-200 rounded">Page \${currentPage} of \${totalPages}</span>\`;
+            
+            if (hasNextPage) {
+                html += \`<button onclick="loadServices(\${currentPage + 1}, document.getElementById('searchInput').value)" 
+                                class="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Next \xBB</button>\`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        // Add service
+        document.getElementById('serviceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const serviceData = {
+                name: document.getElementById('serviceName').value,
+                price: parseFloat(document.getElementById('servicePrice').value),
+                duration_minutes: parseInt(document.getElementById('serviceDuration').value) || null,
+                description: document.getElementById('serviceDescription').value || null
+            };
+
+            try {
+                const response = await fetch('/api/services', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(serviceData)
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Layanan berhasil ditambahkan!');
+                    document.getElementById('serviceForm').reset();
+                    loadServices();
+                    loadStats();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Gagal menambahkan layanan');
+            }
+        });
+
+        // Edit service
+        async function editService(id) {
+            try {
+                const response = await fetch(\`/api/services/\${id}\`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const service = data.service;
+                    document.getElementById('editId').value = service.id;
+                    document.getElementById('editName').value = service.name;
+                    document.getElementById('editPrice').value = service.price;
+                    document.getElementById('editDuration').value = service.duration_minutes || '';
+                    document.getElementById('editDescription').value = service.description || '';
+                    
+                    document.getElementById('editModal').classList.remove('hidden');
+                    document.getElementById('editModal').classList.add('flex');
+                }
+            } catch (error) {
+                alert('Gagal memuat data layanan');
+            }
+        }
+
+        // Update service
+        document.getElementById('editForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const id = document.getElementById('editId').value;
+            const serviceData = {
+                name: document.getElementById('editName').value,
+                price: parseFloat(document.getElementById('editPrice').value),
+                duration_minutes: parseInt(document.getElementById('editDuration').value) || null,
+                description: document.getElementById('editDescription').value || null
+            };
+
+            try {
+                const response = await fetch(\`/api/services/\${id}\`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(serviceData)
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Layanan berhasil diupdate!');
+                    closeEditModal();
+                    loadServices(currentPage);
+                    loadStats();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Gagal mengupdate layanan');
+            }
+        });
+
+        // Delete service
+        async function deleteService(id) {
+            if (confirm('Yakin ingin menghapus layanan ini?')) {
+                try {
+                    const response = await fetch(\`/api/services/\${id}\`, {
+                        method: 'DELETE'
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert('Layanan berhasil dihapus!');
+                        loadServices(currentPage);
+                        loadStats();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                } catch (error) {
+                    alert('Gagal menghapus layanan');
+                }
+            }
+        }
+
+        // Close edit modal
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+            document.getElementById('editModal').classList.remove('flex');
+        }
+
+        // Load stats
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/services/stats');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const stats = data.stats;
+                    document.getElementById('statsContainer').innerHTML = \`
+                        <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                            <h3 class="text-lg font-semibold text-gray-700">Total Layanan</h3>
+                            <p class="text-3xl font-bold text-blue-600">\${stats.totalServices}</p>
+                        </div>
+                        <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                            <h3 class="text-lg font-semibold text-gray-700">Harga Rata-rata</h3>
+                            <p class="text-3xl font-bold text-green-600">Rp \${Math.round(stats.averagePrice).toLocaleString('id-ID')}</p>
+                        </div>
+                        <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                            <h3 class="text-lg font-semibold text-gray-700">Range Harga</h3>
+                            <p class="text-lg font-bold text-purple-600">
+                                Rp \${stats.priceRange.min.toLocaleString('id-ID')} - 
+                                Rp \${stats.priceRange.max.toLocaleString('id-ID')}
+                            </p>
+                        </div>
+                    \`;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const searchTerm = e.target.value;
+            clearTimeout(window.searchTimeout);
+            window.searchTimeout = setTimeout(() => {
+                loadServices(1, searchTerm);
+            }, 500);
+        });
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', () => {
+            loadServices();
+            loadStats();
+        });
+    <\/script>
+</body>
+</html>
+`, "getHTMLPage");
 app.get("/api/services", async (c) => {
   try {
     const page = parseInt(c.req.query("page") || "1");
@@ -1871,15 +2261,15 @@ app.get("/api/services/stats", async (c) => {
     return c.json({ success: false, error: e.message }, 500);
   }
 });
-app.get("/", (c) => {
-  return c.text("\u{1F9B6} Selamat datang di Shoesclean API! Backend sudah enhanced dengan fitur CRUD lengkap, search, dan pagination.");
-});
 app.get("/health", (c) => {
   return c.json({
     status: "healthy",
     timestamp: (/* @__PURE__ */ new Date()).toISOString(),
-    version: "1.1.0"
+    version: "2.0.0 - Full Stack"
   });
+});
+app.get("/", (c) => {
+  return c.html(getHTMLPage());
 });
 var src_default = app;
 
@@ -1924,7 +2314,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-uR00Ls/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-2KAzO4/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -1956,7 +2346,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-uR00Ls/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-2KAzO4/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
