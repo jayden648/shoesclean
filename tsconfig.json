@@ -17,6 +17,9 @@
       "@cloudflare/workers-types" // Penting untuk tipe global Cloudflare Workers
     ]
   },
-  "include": ["src/**/*.ts"], // Sesuaikan jika struktur direktori Anda berbeda
+  "include": [
+    "index.ts", // Menambahkan index.ts di root proyek
+    "src/**/*.ts"
+  ], // Sesuaikan jika struktur direktori Anda berbeda
   "exclude": ["node_modules"]
 }

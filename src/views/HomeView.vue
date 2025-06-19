@@ -1,9 +1,10 @@
 <script setup>
-import TheWelcome from '../components/TheWelcome.vue'
+//import TheWelcome from '../components/TheWelcome.vue'
+import ServiceList from '../components/ServiceList.vue';
 </script>
 
 <template>
   <main>
-    <TheWelcome />
+    <ServiceList />
   </main>
 </template>

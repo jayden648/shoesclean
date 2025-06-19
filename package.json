@@ -4,8 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev:backend": "wrangler dev",
     "dev": "vite",
-    "build": "vite build",
+    "dev:full": "concurrently \"npm run dev:backend\" \"npm run dev\"",
+    "deploy:worker": "wrangler deploy",
+    "migrate": "wrangler d1 migrations apply shoesclean-db --local",
+    "migrate:prod": "wrangler d1 migrations apply shoesclean-db",
+    "build:frontend": "vite build",
     "preview": "vite preview",
     "test:unit": "vitest",
     "format": "prettier --write src/"

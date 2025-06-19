@@ -5,9 +5,10 @@
   "account_id": "c8e7cc23b5cff77fbf9eef544cb35f69",
   "d1_databases": [
     {
-      "binding": "Shoesclean", // Ini adalah nama yang Anda gunakan di kode (c.env.Shoesclean)
-      "database_name": "shoesclean-prod", // Ganti dengan nama database D1 Anda di dashboard Cloudflare
-      "database_id": "bbaea107-154e-4c34-ac67-3191f4b2cfaf" // Ganti dengan ID database D1 Anda
+      "binding": "DB", // Ini adalah nama yang Anda gunakan di kode (c.env.Shoesclean)
+      "database_name": "shoesclean-db", // Ganti dengan nama database D1 Anda di dashboard Cloudflare
+      "database_id": "b3f53077-8861-4f40-bc70-14b0a0d9348b", // Ganti dengan ID database D1 Anda
+      "migrations_dir": "migrations" // Tambahkan baris ini, pastikan folder 'migrations' ada di root proyek
     }
   ]
 }
